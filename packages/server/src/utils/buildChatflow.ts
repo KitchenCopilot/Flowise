@@ -54,7 +54,9 @@ export const utilBuildChatflow = async (req: Request, socketIO?: Server, isInter
     try {
         const appServer = getRunningExpressApp()
         const chatflowid = req.params.id
-        const baseURL = `${req.protocol}://${req.get('host')}`
+
+        const httpProtocol = req.get('x-forwarded-proto') || req.protocol
+        const baseURL = `${httpProtocol}://${req.get('host')}`
 
         let incomingInput: IncomingInput = req.body
         let nodeToExecuteData: INodeData
@@ -415,7 +417,11 @@ export const utilBuildChatflow = async (req: Request, socketIO?: Server, isInter
         return result
     } catch (e) {
         logger.error('[server]: Error:', e)
-        throw new InternalFlowiseError(StatusCodes.INTERNAL_SERVER_ERROR, getErrorMessage(e))
+        if (e instanceof InternalFlowiseError && e.statusCode === StatusCodes.UNAUTHORIZED) {
+            throw e
+        } else {
+            throw new InternalFlowiseError(StatusCodes.INTERNAL_SERVER_ERROR, getErrorMessage(e))
+        }
     }
 }
 
