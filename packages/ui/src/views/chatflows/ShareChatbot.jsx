@@ -42,7 +42,7 @@ const defaultConfig = {
     }
 }
 
-const ShareChatbot = ({ isSessionMemory }) => {
+const ShareChatbot = ({ isSessionMemory, isAgentCanvas }) => {
     const dispatch = useDispatch()
     const theme = useTheme()
     const chatflow = useSelector((state) => state.canvas.chatflow)
@@ -65,6 +65,7 @@ const ShareChatbot = ({ isSessionMemory }) => {
     const [backgroundColor, setBackgroundColor] = useState(chatbotConfig?.backgroundColor ?? defaultConfig.backgroundColor)
     const [fontSize, setFontSize] = useState(chatbotConfig?.fontSize ?? defaultConfig.fontSize)
     const [poweredByTextColor, setPoweredByTextColor] = useState(chatbotConfig?.poweredByTextColor ?? defaultConfig.poweredByTextColor)
+    const [showAgentMessages, setShowAgentMessages] = useState(chatbotConfig?.showAgentMessages || (isAgentCanvas ? true : undefined))
 
     const [botMessageBackgroundColor, setBotMessageBackgroundColor] = useState(
         chatbotConfig?.botMessage?.backgroundColor ?? defaultConfig.botMessage.backgroundColor
@@ -138,6 +139,15 @@ const ShareChatbot = ({ isSessionMemory }) => {
         if (isSessionMemory) obj.overrideConfig.generateNewSession = generateNewSession
 
         if (chatbotConfig?.starterPrompts) obj.starterPrompts = chatbotConfig.starterPrompts
+
+        if (isAgentCanvas) {
+            // if showAgentMessages is undefined, default to true
+            if (showAgentMessages === undefined || showAgentMessages === null) {
+                obj.showAgentMessages = true
+            } else {
+                obj.showAgentMessages = showAgentMessages
+            }
+        }
 
         return obj
     }
@@ -299,6 +309,9 @@ const ShareChatbot = ({ isSessionMemory }) => {
             case 'generateNewSession':
                 setGenerateNewSession(value)
                 break
+            case 'showAgentMessages':
+                setShowAgentMessages(value)
+                break
         }
     }
 
@@ -426,6 +439,7 @@ const ShareChatbot = ({ isSessionMemory }) => {
             {colorField(backgroundColor, 'backgroundColor', 'Background Color')}
             {textField(fontSize, 'fontSize', 'Font Size', 'number')}
             {colorField(poweredByTextColor, 'poweredByTextColor', 'PoweredBy TextColor')}
+            {booleanField(showAgentMessages, 'showAgentMessages', 'Show Agent Reasoning')}
 
             {/*BOT Message*/}
             <Typography variant='h4' sx={{ mb: 1, mt: 2 }}>
@@ -516,7 +530,8 @@ const ShareChatbot = ({ isSessionMemory }) => {
 }
 
 ShareChatbot.propTypes = {
-    isSessionMemory: PropTypes.bool
+    isSessionMemory: PropTypes.bool,
+    isAgentCanvas: PropTypes.bool
 }
 
 export default ShareChatbot
